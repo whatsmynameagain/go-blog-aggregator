@@ -82,10 +82,10 @@ type commands struct {
 }
 
 func (c *commands) register(name string, f func(*state, command) error) {
-	// to-do
+	c.funcs[name] = f
 }
 
 func (c *commands) run(s *state, cmd command) error {
-	// to-do
+	c.funcs[cmd.name](s, cmd)
 	return nil
 }
