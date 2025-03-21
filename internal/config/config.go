@@ -55,3 +55,37 @@ func getConfigFilePath() (string, error) {
 	}
 	return homedir + "/" + configFileName, nil
 }
+
+type state struct {
+	conf *Config
+}
+
+type command struct {
+	name string
+	args []string
+}
+
+func handlerLogin(s *state, cmd command) error {
+	if len(cmd.args) == 0 {
+		return fmt.Errorf("missing argument for login")
+	}
+	if len(cmd.args) > 1 {
+		return fmt.Errorf("too many arguments for login")
+	}
+	s.conf.SetUser(cmd.args[0])
+	fmt.Printf("Username set to '%s'\n", cmd.args[0])
+	return nil
+}
+
+type commands struct {
+	funcs map[string]func(*state, command) error
+}
+
+func (c *commands) register(name string, f func(*state, command) error) {
+	// to-do
+}
+
+func (c *commands) run(s *state, cmd command) error {
+	// to-do
+	return nil
+}
