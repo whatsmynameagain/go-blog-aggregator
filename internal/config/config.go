@@ -86,6 +86,10 @@ func (c *commands) register(name string, f func(*state, command) error) {
 }
 
 func (c *commands) run(s *state, cmd command) error {
-	c.funcs[cmd.name](s, cmd)
+	funcToRun, ok := c.funcs[cmd.name]
+	if !ok {
+		return fmt.Errorf("function for command '%s' does not exist", cmd.name)
+	}
+	funcToRun(s, cmd)
 	return nil
 }
