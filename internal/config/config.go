@@ -23,7 +23,7 @@ func Read() (Config, error) {
 	if err != nil {
 		return conf, fmt.Errorf("error: %v", err)
 	}
-	err = json.Unmarshal(content, &conf)
+	err = json.Unmarshal(content, &conf) //failing here
 	if err != nil {
 		return Config{}, err
 	}

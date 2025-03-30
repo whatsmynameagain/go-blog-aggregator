@@ -3,7 +3,7 @@ CREATE TABLE users (
     id UUID primary key,
     created_at TIMESTAMP not null,
     updated_at TIMESTAMP not null,
-    name text UNIQUE
+    name text NOT NULL UNIQUE
 );
 
 -- +goose Down
