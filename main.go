@@ -1,14 +1,42 @@
 package main
 
 import (
-	"fmt"
+	"log"
+	"os"
 
 	"github.com/whatsmynameagain/go-blog-aggregator/internal/config"
 )
 
+type state struct {
+	conf *config.Config
+}
+
 func main() {
-	conf, _ := config.Read()
-	conf.SetUser("Potato")
-	fmt.Printf("%v\n", conf.DBUrl)
-	fmt.Printf("%v\n", conf.CurrentUserName)
+	conf, err := config.Read()
+	if err != nil {
+		log.Fatalf("error reading config: %v", err)
+	}
+	programState := &state{
+		conf: &conf,
+	}
+	commands := commands{
+		funcs: make(map[string]func(*state, command) error),
+	}
+
+	// reg login
+	commands.register("login", handlerLogin)
+
+	if len(os.Args) < 2 {
+		log.Fatal("Usage: cli <command> [args...]")
+		return
+	}
+
+	commandName := os.Args[1]
+	commandArgs := os.Args[2:]
+
+	err = commands.run(programState, command{Name: commandName, Args: commandArgs})
+	if err != nil {
+		log.Fatal(err)
+	}
+
 }
