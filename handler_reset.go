@@ -13,7 +13,7 @@ func handlerReset(s *state, cmd command) error {
 
 	err := s.db.DeleteUsers(context.Background())
 	if err != nil {
-		return fmt.Errorf("Error deleting users: %w", err)
+		return fmt.Errorf("error deleting users: %w", err)
 	}
 	fmt.Printf("Deleted all users\n")
 	return nil

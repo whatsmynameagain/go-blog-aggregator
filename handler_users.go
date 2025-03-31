@@ -11,11 +11,9 @@ func handlerUsers(s *state, cmd command) error {
 		return fmt.Errorf("usage: %s", cmd.Name)
 	}
 
-	// func (q *Queries) GetUsers(ctx context.Context) ([]string, error) {
-
 	users, err := s.db.GetUsers(context.Background())
 	if err != nil {
-		return fmt.Errorf("Error getting users list: %w", err)
+		return fmt.Errorf("error getting users list: %w", err)
 	}
 
 	for _, user := range users {
