@@ -11,8 +11,6 @@ func handlerReset(s *state, cmd command) error {
 		return fmt.Errorf("usage: %s", cmd.Name)
 	}
 
-	// func (q *Queries) DeleteUsers(ctx context.Context) error {
-
 	err := s.db.DeleteUsers(context.Background())
 	if err != nil {
 		return fmt.Errorf("Error deleting users: %w", err)
