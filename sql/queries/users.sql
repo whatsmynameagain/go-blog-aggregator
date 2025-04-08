@@ -17,5 +17,11 @@ WHERE name = $1;
 -- name: DeleteUsers :exec
 DELETE FROM users;
 
+
 -- name: GetUsers :many
 SELECT name FROM users;
+
+
+-- name: GetUserFromUUID :one
+SELECT name FROM users
+WHERE id = $1;
