@@ -7,8 +7,6 @@ import (
 
 func handlerFeeds(s *state, cmd command) error {
 
-	// func (q *Queries) GetFeeds(ctx context.Context) ([]Feed, error) {
-	// func (q *Queries) GetUserFromUUID(ctx context.Context, id uuid.UUID) (string, error) {
 	if len(cmd.Args) != 0 {
 		return fmt.Errorf("usage: %s", cmd.Name)
 	}
