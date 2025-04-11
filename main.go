@@ -36,7 +36,6 @@ func main() {
 		funcs: make(map[string]func(*state, command) error),
 	}
 
-	// reg login
 	commands.register("login", handlerLogin)
 	commands.register("register", handlerRegister)
 	commands.register("reset", handlerReset)
