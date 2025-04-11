@@ -9,31 +9,9 @@ import (
 	"github.com/whatsmynameagain/go-blog-aggregator/internal/database"
 )
 
-/*
-Add a follow command. It takes a single url argument and creates a new feed
-follow record for the current user. It should print the name of the feed and
-the current user once the record is created (which the query we just made should
-support). You'll need a query to look up feeds by URL.
-*/
-
-/*
-type GetFeedsRow struct {
-	Name   string
-	Url    string
-	UserID uuid.UUID
-}
-
-func (q *Queries) GetFeeds(ctx context.Context) ([]GetFeedsRow, error)
-*/
-
-func handlerFollow(s *state, cmd command) error {
+func handlerFollow(s *state, cmd command, user database.User) error {
 	if len(cmd.Args) != 1 {
 		return fmt.Errorf("usage: %s <url>", cmd.Name)
-	}
-
-	user, err := s.db.GetUser(context.Background(), s.conf.CurrentUserName)
-	if err != nil {
-		return fmt.Errorf("failed to get user: %w", err)
 	}
 
 	feed, err := s.db.GetFeedByURL(context.Background(), cmd.Args[0])
@@ -57,11 +35,7 @@ func handlerFollow(s *state, cmd command) error {
 	return nil
 }
 
-func handlerListFeedFollows(s *state, cmd command) error {
-	user, err := s.db.GetUser(context.Background(), s.conf.CurrentUserName)
-	if err != nil {
-		return err
-	}
+func handlerListFeedFollows(s *state, cmd command, user database.User) error {
 
 	feedFollows, err := s.db.GetFeedFollowsForUser(context.Background(), user.ID)
 	if err != nil {
