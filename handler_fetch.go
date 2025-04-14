@@ -2,11 +2,15 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"encoding/xml"
 	"fmt"
 	"html"
 	"io"
 	"net/http"
+	"time"
+
+	"github.com/whatsmynameagain/go-blog-aggregator/internal/database"
 )
 
 type RSSFeed struct {
@@ -73,4 +77,40 @@ func fetchFeed(ctx context.Context, feedURL string) (*RSSFeed, error) {
 	}
 
 	return &feed, nil
+}
+
+// untested
+func scrapeFeeds(s *state) error {
+
+	// nextFeed : database.Feed
+	nextFeed, err := s.db.GetNextFeedToFetch(context.Background())
+	if err != nil {
+		return fmt.Errorf("error trying to get next feed: %w", err)
+	}
+
+	fetchedParams := database.MarkFeedFetchedParams{
+		ID: nextFeed.ID,
+		LastFetchedAt: sql.NullTime{
+			Time:  time.Now(),
+			Valid: true,
+		},
+		UpdatedAt: nextFeed.UpdatedAt,
+	}
+
+	err = s.db.MarkFeedFetched(context.Background(), fetchedParams)
+	if err != nil {
+		return fmt.Errorf("error marking feed fetched: %w", err)
+	}
+
+	feed, err := fetchFeed(context.Background(), nextFeed.Url)
+	if err != nil {
+		return fmt.Errorf("error fetching feed: %w", err)
+	}
+
+	fmt.Println("Titles: ")
+	for _, item := range feed.Channel.Item {
+		fmt.Printf("%s\n", item.Title)
+	}
+
+	return nil
 }
