@@ -36,11 +36,11 @@ func handlerFetch(s *state, cmd command) error {
 		return fmt.Errorf("usage: %s <time_between_requests>", cmd.Name)
 	}
 
-	timeBetweenReqs, err := time.ParseDuration(cmd.Args[1])
+	timeBetweenReqs, err := time.ParseDuration(cmd.Args[0])
 	if err != nil {
 		return fmt.Errorf("error parsing duration: %w", err)
 	}
-	fmt.Printf("Collecting feeds every %v", timeBetweenReqs)
+	fmt.Printf("Collecting feeds every %v\n", timeBetweenReqs)
 
 	// moved to a different method to avoid unreachable code after the infinite loop
 	runFetchLoop(s, timeBetweenReqs)
@@ -124,7 +124,7 @@ func runFetchLoop(s *state, timeBetweenReqs time.Duration) {
 	ticker := time.NewTicker(timeBetweenReqs)
 	defer ticker.Stop() // not really needed because infinite loop
 	for ; ; <-ticker.C {
-		fmt.Printf("scraping...") // temp, to make sure it's not bombarding the servers
+		fmt.Printf("Scraping...\n") // temp, to make sure it's not bombarding the servers
 		scrapeFeeds(s)
 	}
 }
