@@ -30,16 +30,21 @@ type RSSItem struct {
 }
 
 func handlerFetch(s *state, cmd command) error {
-	hardcodedURL := "https://www.wagslane.dev/index.xml"
-	ctx := context.Background()
-	feed, err := fetchFeed(ctx, hardcodedURL)
-	if err != nil {
-		return fmt.Errorf("error fetching feed: %w", err)
+
+	// check for arg (time_between_reqs)
+	if len(cmd.Args) != 1 {
+		return fmt.Errorf("usage: %s <time_between_requests>", cmd.Name)
 	}
 
-	// print output
+	timeBetweenReqs, err := time.ParseDuration(cmd.Args[1])
+	if err != nil {
+		return fmt.Errorf("error parsing duration: %w", err)
+	}
+	fmt.Printf("Collecting feeds every %v", timeBetweenReqs)
 
-	fmt.Printf("%v", feed)
+	// moved to a different method to avoid unreachable code after the infinite loop
+	runFetchLoop(s, timeBetweenReqs)
+
 	return nil
 }
 
@@ -113,4 +118,13 @@ func scrapeFeeds(s *state) error {
 	}
 
 	return nil
+}
+
+func runFetchLoop(s *state, timeBetweenReqs time.Duration) {
+	ticker := time.NewTicker(timeBetweenReqs)
+	defer ticker.Stop() // not really needed because infinite loop
+	for ; ; <-ticker.C {
+		fmt.Printf("scraping...") // temp, to make sure it's not bombarding the servers
+		scrapeFeeds(s)
+	}
 }
