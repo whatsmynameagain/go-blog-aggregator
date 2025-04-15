@@ -27,7 +27,7 @@ type CreatePostParams struct {
 	Url         string
 	Description sql.NullString
 	PublishedAt sql.NullTime
-	FeedID      uuid.NullUUID
+	FeedID      uuid.UUID
 }
 
 func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) (Post, error) {
@@ -53,4 +53,51 @@ func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) (Post, e
 		&i.FeedID,
 	)
 	return i, err
+}
+
+const getPostsForUser = `-- name: GetPostsForUser :many
+SELECT id, created_at, updated_at, title, url, description, published_at, feed_id FROM posts
+WHERE $1 IN (
+    SELECT user_id FROM feeds
+)
+ORDER BY updated_at NULLS FIRST
+LIMIT $2
+`
+
+type GetPostsForUserParams struct {
+	Column1 interface{}
+	Limit   int32
+}
+
+// untested
+func (q *Queries) GetPostsForUser(ctx context.Context, arg GetPostsForUserParams) ([]Post, error) {
+	rows, err := q.db.QueryContext(ctx, getPostsForUser, arg.Column1, arg.Limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Post
+	for rows.Next() {
+		var i Post
+		if err := rows.Scan(
+			&i.ID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Title,
+			&i.Url,
+			&i.Description,
+			&i.PublishedAt,
+			&i.FeedID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
