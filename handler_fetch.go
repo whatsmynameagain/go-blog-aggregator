@@ -8,8 +8,10 @@ import (
 	"html"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/whatsmynameagain/go-blog-aggregator/internal/database"
 )
 
@@ -114,7 +116,36 @@ func scrapeFeeds(s *state) error {
 
 	fmt.Println("Titles: ")
 	for _, item := range feed.Channel.Item {
-		fmt.Printf("%s\n", item.Title)
+		publishedAt := sql.NullTime{}
+		if t, err := time.Parse(time.RFC1123Z, item.PubDate); err == nil {
+			publishedAt = sql.NullTime{
+				Time:  t,
+				Valid: true,
+			}
+		}
+
+		_, err = s.db.CreatePost(context.Background(), database.CreatePostParams{
+			ID:        uuid.New(),
+			CreatedAt: time.Now().UTC(),
+			UpdatedAt: time.Now().UTC(),
+			FeedID:    nextFeed.ID,
+			Title:     item.Title,
+			Description: sql.NullString{
+				String: item.Description,
+				Valid:  true,
+			},
+			Url:         item.Link,
+			PublishedAt: publishedAt,
+		})
+		if err != nil {
+			// stealing this from the solution
+			if strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
+				continue
+			}
+			fmt.Printf("couldn't create post: %v", err)
+			continue
+		}
+
 	}
 
 	return nil
